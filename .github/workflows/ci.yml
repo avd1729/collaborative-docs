@@ -22,8 +22,12 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        if: fileExists('pom.xml')
-        run: mvn -B clean verify
+        run: |
+          if [ -f pom.xml ]; then
+            mvn -B clean verify
+          else
+            echo "No pom.xml found, skipping Maven build."
+          fi
 
       - name: Upload test report
         if: always()
