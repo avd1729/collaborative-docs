@@ -2,7 +2,7 @@ package com.example.docs.ot.utils;
 
 import com.example.docs.ot.model.Operation;
 
-public class OperationsTransformer {
+public class OperationTransformer {
     public static String apply(String doc, Operation op){
         switch (op.getType()) {
             case INSERT -> {
