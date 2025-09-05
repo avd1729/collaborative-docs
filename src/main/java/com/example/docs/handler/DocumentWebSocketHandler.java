@@ -32,21 +32,27 @@ public class DocumentWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("Received: " + message.getPayload());
+        System.out.println("Received from " + session.getId() + ": " + message.getPayload());
 
         JsonNode node = objectMapper.readTree(message.getPayload());
         String type = node.get("type").asText();
 
         if("operation".equals(type)){
             Operation op = objectMapper.treeToValue(node.get("op"), Operation.class);
+
+            // Apply operation to the document
             otEngine.applyOperation(op);
 
+            System.out.println("Document after operation: '" + otEngine.getDocument() + "' (version: " + otEngine.getVersion() + ")");
+
+            // Broadcast to ALL clients (including sender) - this is correct for OT
             OperationMessage update = new OperationMessage("operation", op, otEngine.getVersion());
             broadcast(objectMapper.writeValueAsString(update));
         }
     }
 
     private void broadcast(String msg) throws Exception {
+        System.out.println("Broadcasting to " + sessions.size() + " clients: " + msg);
         for (WebSocketSession s: sessions){
             if(s.isOpen()) {
                 s.sendMessage(new TextMessage(msg));
@@ -84,4 +90,3 @@ public class DocumentWebSocketHandler extends TextWebSocketHandler {
         }
     }
 }
-
