@@ -9,7 +9,12 @@ public class OperationTransformer {
                 return doc.substring(0, op.getPosition()) + op.getCharacter() + doc.substring(op.getPosition());
             }
             case DELETE -> {
-                return doc.substring(0, op.getPosition()) + doc.substring(op.getPosition() + 1);
+                int pos = op.getPosition();
+                if (pos < 0 || pos >= doc.length()) {
+                    // Invalid delete → ignore safely
+                    return doc;
+                }
+                return doc.substring(0, pos) + doc.substring(pos + 1);
             }
             default -> throw new IllegalArgumentException("Unknown operation type!");
         }
